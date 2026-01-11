@@ -37,7 +37,7 @@ class AuthController extends Controller
             );
 
             // Log the user in
-            Auth::login($user, true);
+            Auth::login($user);
 
             return redirect()->intended('/chat');
         } catch (\Exception $e) {
