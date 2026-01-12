@@ -81,14 +81,14 @@
     </style>
 </head>
 <body class="bg-gray-50">
-    <div class="container mx-auto max-w-4xl p-4">
+    <div class="flex flex-col mx-auto max-w-4xl h-screen justify-between">
         <!-- Header -->
-        <header class="bg-white rounded-lg shadow-sm p-4 mb-4">
+        <header class="bg-white shadow-sm p-4">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-4">
                     @auth
-                        <img src="{{ auth()->user()->github_avatar_url ?? 'https://via.placeholder.com/40' }}" 
-                             alt="{{ auth()->user()->username }}" 
+                        <img src="{{ auth()->user()->github_avatar_url ?? 'https://via.placeholder.com/40' }}"
+                             alt="{{ auth()->user()->username }}"
                              class="w-10 h-10 rounded-full">
                         <div>
                             <div class="font-medium">{{ auth()->user()->username }}</div>
@@ -109,17 +109,17 @@
         </header>
 
         <!-- Messages Container -->
-        <div id="messages" class="bg-white rounded-lg shadow-sm">
+        <div id="messages" class="bg-white shadow-sm">
             <!-- Messages will be loaded here -->
         </div>
 
         <!-- Message Input -->
-        <div class="bg-white rounded-lg shadow-sm p-4 mt-4">
+        <div class="bg-white shadow-sm p-4">
             <form id="message-form" class="flex gap-2">
-                <textarea 
-                    id="message-input" 
-                    rows="2" 
-                    placeholder="Type your message..." 
+                <textarea
+                    id="message-input"
+                    rows="2"
+                    placeholder="Type your message..."
                     required
                     maxlength="5000"></textarea>
                 <button type="submit" id="send-button">Send</button>
@@ -168,7 +168,7 @@
                 console.error('SSE Error:', e);
                 isConnected = false;
                 updateConnectionStatus(false);
-                
+
                 // Try to reconnect after 3 seconds
                 setTimeout(connectSSE, 3000);
             };
@@ -178,7 +178,7 @@
         function updateConnectionStatus(connected) {
             const statusIndicator = document.getElementById('connection-status');
             const statusText = document.getElementById('status-text');
-            
+
             if (connected) {
                 statusIndicator.className = 'status-indicator status-connected';
                 statusText.textContent = 'Connected';
@@ -193,14 +193,14 @@
             try {
                 const response = await fetch('/api/messages');
                 const data = await response.json();
-                
+
                 const messagesContainer = document.getElementById('messages');
                 messagesContainer.innerHTML = '';
-                
+
                 data.messages.forEach(message => {
                     addMessageToUI(message);
                 });
-                
+
                 scrollToBottom();
             } catch (error) {
                 console.error('Error loading chat history:', error);
@@ -212,21 +212,21 @@
             const messagesContainer = document.getElementById('messages');
             const messageDiv = document.createElement('div');
             messageDiv.className = 'message';
-            
+
             const date = new Date(message.created_at);
             const timeString = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            
+
             messageDiv.innerHTML = `
                 <div class="message-header">
-                    <img src="${message.avatar_url || 'https://via.placeholder.com/32'}" 
-                         alt="${message.username}" 
+                    <img src="${message.avatar_url || 'https://via.placeholder.com/32'}"
+                         alt="${message.username}"
                          class="message-avatar">
                     <span class="font-medium">${message.username}</span>
                     <span class="message-time">${timeString}</span>
                 </div>
                 <div class="message-content">${message.content}</div>
             `;
-            
+
             messagesContainer.appendChild(messageDiv);
             scrollToBottom();
         }
@@ -240,19 +240,19 @@
         // Send message
         document.getElementById('message-form').addEventListener('submit', async function(e) {
             e.preventDefault();
-            
+
             const input = document.getElementById('message-input');
             const button = document.getElementById('send-button');
             const content = input.value.trim();
-            
+
             if (!content) {
                 return;
             }
-            
+
             // Disable button while sending
             button.disabled = true;
             button.textContent = 'Sending...';
-            
+
             try {
                 const response = await fetch('/api/messages', {
                     method: 'POST',
@@ -262,11 +262,8 @@
                     },
                     body: JSON.stringify({ content: content })
                 });
-                
+
                 if (response.ok) {
-                    const data = await response.json();
-                    // Message will be added via SSE, but we can add it immediately for better UX
-                    addMessageToUI(data.message);
                     input.value = '';
                 } else {
                     const error = await response.json();
@@ -296,4 +293,3 @@
     </script>
 </body>
 </html>
-
